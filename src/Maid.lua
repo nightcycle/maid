@@ -7,10 +7,20 @@
 local Maid: {[any]: any} = {}
 Maid.ClassName = "Maid"
 
+export type Maid = {
+	isMaid: (any) -> boolean,
+	new: () -> Maid,
+	[any]: any?,
+	GiveTask: (self: Maid, any) -> nil,
+	GivePromise: (self: Maid, any) -> nil,
+	DoCleaning: (self:Maid) -> nil,
+	Destroy: (self: Maid) -> nil,
+}
+
 --- Returns a new Maid object
 -- @constructor Maid.new()
 -- @treturn Maid
-function Maid.new()
+function Maid.new(): Maid
 	local self:{[any]: any?} = {
 		_tasks = {}
 	}
@@ -127,7 +137,6 @@ function Maid:DoCleaning()
 	end
 end
 
-export type Maid = typeof(Maid.new())
 
 --- Alias for DoCleaning()
 -- @function Destroy

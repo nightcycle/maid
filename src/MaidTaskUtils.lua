@@ -4,13 +4,13 @@
 
 local MaidTaskUtils = {}
 
-function MaidTaskUtils.isValidTask(job)
+function MaidTaskUtils.isValidTask(job): boolean
 	return type(job) == "function"
 		or typeof(job) == "RBXScriptConnection"
 		or type(job) == "table" and type(job.Destroy) == "function"
 end
 
-function MaidTaskUtils.doTask(job)
+function MaidTaskUtils.doTask(job): nil
 	if type(job) == "function" then
 		job()
 	elseif typeof(job) == "RBXScriptConnection" then
@@ -22,7 +22,7 @@ function MaidTaskUtils.doTask(job)
 	end
 end
 
-function MaidTaskUtils.delayed(time, job)
+function MaidTaskUtils.delayed(time, job): () -> nil
 	assert(type(time) == "number", "Bad time")
 	assert(MaidTaskUtils.isValidTask(job), "Bad job")
 

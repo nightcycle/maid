@@ -1,12 +1,20 @@
 local Maid = require(script.Maid)
+local MaidTaskUtils = require(script.MaidTaskUtils)
 
 export type Maid = Maid.Maid
 
-local meta = {
-	__index = Maid;
+export type MaidConstructor = {
+	isValidTask: (job: any) -> boolean,
+	doTask: (job: any) -> nil,
+	delayed: (time: number, job: any) -> (()->nil),
+	new: () -> Maid,
 }
 
-return setmetatable({
-	MaidTaskUtils = require(script.MaidTaskUtils);
-	Maid = Maid;
-}, meta)
+local interface: MaidConstructor = {
+	isValidTask = MaidTaskUtils.isValidTask,
+	doTask = MaidTaskUtils.doTask,
+	delayed = MaidTaskUtils.delayed,
+	new = Maid.new,
+}
+
+return interface
