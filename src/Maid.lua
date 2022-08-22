@@ -7,6 +7,9 @@
 local Maid: {[any]: any} = {}
 Maid.ClassName = "Maid"
 
+local MaidTaskUtils = require(script.Parent.MaidTaskUtils)
+
+
 export type Maid = {
 	isMaid: (any) -> boolean,
 	new: () -> Maid,
@@ -24,7 +27,8 @@ function Maid.new(): Maid
 	local self:{[any]: any?} = {
 		_tasks = {}
 	}
-	return setmetatable(self, Maid)
+	local s: any = setmetatable(self, Maid)
+	return s
 end
 
 function Maid.isMaid(value)
@@ -65,13 +69,14 @@ function Maid:__newindex(index, newTask)
 	tasks[index] = newTask
 
 	if oldTask then
-		if type(oldTask) == "function" then
-			oldTask()
-		elseif typeof(oldTask) == "RBXScriptConnection" then
-			oldTask:Disconnect()
-		elseif oldTask.Destroy then
-			oldTask:Destroy()
-		end
+		MaidTaskUtils.doTask(oldTask)
+		-- if type(oldTask) == "function" then
+		-- 	oldTask()
+		-- elseif typeof(oldTask) == "RBXScriptConnection" then
+		-- 	oldTask:Disconnect()
+		-- elseif oldTask.Destroy then
+		-- 	oldTask:Destroy()
+		-- end
 	end
 end
 
@@ -126,13 +131,14 @@ function Maid:DoCleaning()
 	local index, job = next(tasks)
 	while job ~= nil do
 		tasks[index] = nil
-		if type(job) == "function" then
-			job()
-		elseif typeof(job) == "RBXScriptConnection" then
-			job:Disconnect()
-		elseif job.Destroy then
-			job:Destroy()
-		end
+		MaidTaskUtils.doTask(job)
+		-- if type(job) == "function" then
+		-- 	job()
+		-- elseif typeof(job) == "RBXScriptConnection" then
+		-- 	job:Disconnect()
+		-- elseif job.Destroy then
+		-- 	job:Destroy()
+		-- end
 		index, job = next(tasks)
 	end
 end

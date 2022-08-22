@@ -15,11 +15,21 @@ function MaidTaskUtils.doTask(job): nil
 		job()
 	elseif typeof(job) == "RBXScriptConnection" then
 		job:Disconnect()
+	elseif typeof(job) == "Instance" then
+		local function isDestroyed(x: any): boolean
+			-- if x.Parent then return false end
+			local _, result = pcall(function() x.Parent = x end)
+			return result:match("locked") and true or false
+		end
+		if not isDestroyed(job) then
+			job:Destroy()
+		end
 	elseif type(job) == "table" and type(job.Destroy) == "function" then
 		job:Destroy()
 	else
 		error("Bad job")
 	end
+	return nil
 end
 
 function MaidTaskUtils.delayed(time, job): () -> nil
