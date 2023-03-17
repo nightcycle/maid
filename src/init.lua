@@ -5,7 +5,7 @@ export type Maid = Maid.Maid
 
 export type MaidConstructor = {
 	isValidTask: (job: any) -> boolean,
-	doTask: (job: any) -> nil,
+	doTask: (job: any, key: any?) -> nil,
 	delayed: (time: number, job: any) -> (()->nil),
 	new: () -> Maid,
 }

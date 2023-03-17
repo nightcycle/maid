@@ -3,22 +3,26 @@
 -- Useful for encapsulating state and make deconstructors easy
 -- @classmod Maid
 -- @see Signal
+export type Maid = {
+	isMaid: (any) -> boolean,
+	new: () -> Maid,
+	_tasks: {[number]: any},
+	bind: (inst: Instance) -> Maid,
+	[any]: any?,
+	_GiveTask: <T>(self: Maid, task: T) -> number,
+	GiveTask: <T>(self: Maid, task: T) -> T,
+	GivePromise: (self: Maid, any) -> nil,
+	DoCleaning: (self:Maid) -> nil,
+	Destroy: (self: Maid) -> nil,
+	ClassName: "Maid",
+}
 
-local Maid: {[any]: any} = {}
+local Maid: Maid = {} :: any
 Maid.ClassName = "Maid"
 
 local MaidTaskUtils = require(script.Parent.MaidTaskUtils)
 
 
-export type Maid = {
-	isMaid: (any) -> boolean,
-	new: () -> Maid,
-	[any]: any?,
-	GiveTask: (self: Maid, any) -> nil,
-	GivePromise: (self: Maid, any) -> nil,
-	DoCleaning: (self:Maid) -> nil,
-	Destroy: (self: Maid) -> nil,
-}
 
 --- Returns a new Maid object
 -- @constructor Maid.new()
@@ -29,6 +33,14 @@ function Maid.new(): Maid
 	}
 	local s: any = setmetatable(self, Maid)
 	return s
+end
+
+function Maid.bind(inst: Instance): Maid
+	local maid = Maid.new()
+	maid:GiveTask(inst.Destroying:Connect(function()
+		maid:Destroy()
+	end))
+	return maid
 end
 
 function Maid.isMaid(value)
@@ -69,7 +81,7 @@ function Maid:__newindex(index, newTask)
 	tasks[index] = newTask
 
 	if oldTask then
-		MaidTaskUtils.doTask(oldTask)
+		MaidTaskUtils.doTask(oldTask, index)
 		-- if type(oldTask) == "function" then
 		-- 	oldTask()
 		-- elseif typeof(oldTask) == "RBXScriptConnection" then
@@ -83,7 +95,7 @@ end
 --- Same as indexing, but uses an incremented number as a key.
 -- @param task An item to clean
 -- @treturn number taskId
-function Maid:GiveTask(task)
+function Maid:_GiveTask<T>(task: T)
 	if not task then
 		error("Task cannot be false or nil", 2)
 	end
@@ -98,13 +110,19 @@ function Maid:GiveTask(task)
 	return taskId
 end
 
+function Maid:GiveTask<T>(task: T): T
+	self:_GiveTask(task)
+	return task
+end
+
 function Maid:GivePromise(promise)
 	if not promise:IsPending() then
 		return promise
 	end
 
 	local newPromise = promise.resolved(promise)
-	local id = self:GiveTask(newPromise)
+	local id = self:_GiveTask(newPromise)
+	
 
 	-- Ensure GC
 	newPromise:Finally(function()
@@ -130,8 +148,10 @@ function Maid:DoCleaning()
 	-- Clear out tasks table completely, even if clean up tasks add more tasks to the maid
 	local index, job = next(tasks)
 	while job ~= nil do
-		tasks[index] = nil
-		MaidTaskUtils.doTask(job)
+		if index ~= nil then
+			tasks[index] = nil
+		end
+		MaidTaskUtils.doTask(job, index)
 		-- if type(job) == "function" then
 		-- 	job()
 		-- elseif typeof(job) == "RBXScriptConnection" then
@@ -141,6 +161,7 @@ function Maid:DoCleaning()
 		-- end
 		index, job = next(tasks)
 	end
+	return nil
 end
 
 

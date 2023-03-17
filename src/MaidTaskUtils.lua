@@ -10,7 +10,7 @@ function MaidTaskUtils.isValidTask(job): boolean
 		or type(job) == "table" and type(job.Destroy) == "function"
 end
 
-function MaidTaskUtils.doTask(job): nil
+function MaidTaskUtils.doTask(job, key: any?): nil
 	if type(job) == "function" then
 		job()
 	elseif typeof(job) == "RBXScriptConnection" then
@@ -22,11 +22,20 @@ function MaidTaskUtils.doTask(job): nil
 			return result:match("locked") and true or false
 		end
 		if not isDestroyed(job) then
-			job:Destroy()
+			pcall(function()
+				job:Destroy()
+			end)
 		end
 	elseif type(job) == "table" and type(job.Destroy) == "function" then
 		job:Destroy()
 	else
+		print("Job info:", typeof(job))
+		print("Key", key)
+		if typeof(job) == "table" then
+			for k, v in pairs(job) do
+				print("\t"..tostring(k)..": "..tostring(v))
+			end
+		end
 		error("Bad job")
 	end
 	return nil
