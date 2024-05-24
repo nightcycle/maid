@@ -5,9 +5,7 @@
 local MaidTaskUtils = {}
 
 function MaidTaskUtils.isValidTask(job): boolean
-	return type(job) == "function"
-		or typeof(job) == "RBXScriptConnection"
-		or type(job) == "table" and type(job.Destroy) == "function"
+	return type(job) == "function" or typeof(job) == "RBXScriptConnection" or type(job) == "table" and type(job.Destroy) == "function"
 end
 
 function MaidTaskUtils.doTask(job, key: any?): nil
@@ -18,7 +16,9 @@ function MaidTaskUtils.doTask(job, key: any?): nil
 	elseif typeof(job) == "Instance" then
 		local function isDestroyed(x: any): boolean
 			-- if x.Parent then return false end
-			local _, result = pcall(function() x.Parent = x end)
+			local _, result = pcall(function()
+				x.Parent = x
+			end)
 			return result:match("locked") and true or false
 		end
 		if not isDestroyed(job) then
@@ -33,7 +33,7 @@ function MaidTaskUtils.doTask(job, key: any?): nil
 		print("Key", key)
 		if typeof(job) == "table" then
 			for k, v in pairs(job) do
-				print("\t"..tostring(k)..": "..tostring(v))
+				print("\t" .. tostring(k) .. ": " .. tostring(v))
 			end
 		end
 		error("Bad job")

@@ -2,7 +2,7 @@ local Maid = require(script.Maid)
 local MaidTaskUtils = require(script.MaidTaskUtils)
 
 export type Maid = Maid.Maid
-
+export type MaidTask = Maid.MaidTask
 export type MaidConstructor = {
 	isValidTask: (job: any) -> boolean,
 	doTask: (job: any, key: any?) -> nil,

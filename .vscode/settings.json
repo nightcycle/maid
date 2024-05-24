@@ -1,3 +1,9 @@
 {
-	"luau-lsp.sourcemap.rojoProjectFile": "default.project.json"
+	"editor.formatOnSave": true,
+	"luau-lsp.sourcemap.rojoProjectFile": "dev.project.json",
+	"files.exclude": {
+		"**lints": true,
+		"**types": true,
+		"sourcemap.json": true,
+	}
 }

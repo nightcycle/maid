@@ -1,0 +1,20 @@
+
+
+# Directories
+Packages/**
+types
+lints
+
+# Files
+sourcemap.json
+wally.lock
+package-lock.json
+keys.txt
+
+# File types
+*.lock
+*.gitconfig
+*.rbxl
+*.rbxlx
+*.lock
+

@@ -3,15 +3,15 @@
 -- Useful for encapsulating state and make deconstructors easy
 -- @classmod Maid
 -- @see Signal
+export type MaidTask = {Disconnect: (any) -> ()} | {Destroy: (any) -> ()} | () -> () | Instance | RBXScriptConnection
 export type Maid = {
-	isMaid: (any) -> boolean,
+	__index: (self: Maid, key: unknown) -> (),
+	__newindex: (self: Maid, index: unknown, newTask: MaidTask) -> (),
 	new: () -> Maid,
-	_tasks: {[number]: any},
-	bind: (inst: Instance) -> Maid,
-	[any]: any?,
-	_GiveTask: <T>(self: Maid, task: T) -> number,
-	GiveTask: <T>(self: Maid, task: T) -> T,
-	GivePromise: (self: Maid, any) -> nil,
+	_tasks: {[unknown]: MaidTask},
+	[unknown]: MaidTask?,
+	_GiveTask: <T>(self: Maid, task: T & MaidTask) -> number,
+	GiveTask: <T>(self: Maid, task: T & MaidTask) -> T,
 	DoCleaning: (self:Maid) -> nil,
 	Destroy: (self: Maid) -> nil,
 	ClassName: "Maid",
@@ -35,25 +35,13 @@ function Maid.new(): Maid
 	return s
 end
 
-function Maid.bind(inst: Instance): Maid
-	local maid = Maid.new()
-	maid:GiveTask(inst.Destroying:Connect(function()
-		maid:Destroy()
-	end))
-	return maid
-end
-
-function Maid.isMaid(value)
-	return type(value) == "table" and value.ClassName == "Maid"
-end
-
 --- Returns Maid[key] if not part of Maid metatable
 -- @return Maid[key] value
-function Maid:__index(index)
+function Maid:__index(index: unknown)
 	if Maid[index] then
 		return Maid[index]
 	else
-		return self._tasks[index]
+		return self._tasks[index :: any]
 	end
 end
 
@@ -66,7 +54,7 @@ end
 -- Maid[key] = (Object)           Maids can cleanup objects with a `Destroy` method
 -- Maid[key] = nil                Removes a named task. If the task is an event, it is disconnected. If it is an object,
 --                                it is destroyed.
-function Maid:__newindex(index, newTask)
+function Maid:__newindex(index: unknown, newTask)
 	if Maid[index] ~= nil then
 		error(("'%s' is reserved"):format(tostring(index)), 2)
 	end
@@ -95,7 +83,7 @@ end
 --- Same as indexing, but uses an incremented number as a key.
 -- @param task An item to clean
 -- @treturn number taskId
-function Maid:_GiveTask<T>(task: T)
+function Maid:_GiveTask<T>(task: T & MaidTask): number
 	if not task then
 		error("Task cannot be false or nil", 2)
 	end
@@ -110,26 +98,9 @@ function Maid:_GiveTask<T>(task: T)
 	return taskId
 end
 
-function Maid:GiveTask<T>(task: T): T
+function Maid:GiveTask<T>(task: T & MaidTask): T
 	self:_GiveTask(task)
 	return task
-end
-
-function Maid:GivePromise(promise)
-	if not promise:IsPending() then
-		return promise
-	end
-
-	local newPromise = promise.resolved(promise)
-	local id = self:_GiveTask(newPromise)
-	
-
-	-- Ensure GC
-	newPromise:Finally(function()
-		self[id] = nil
-	end)
-
-	return newPromise
 end
 
 --- Cleans up all tasks.
