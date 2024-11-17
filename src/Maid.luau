@@ -3,16 +3,22 @@
 -- Useful for encapsulating state and make deconstructors easy
 -- @classmod Maid
 -- @see Signal
-export type MaidTask = {Disconnect: (any) -> ()} | {Destroy: (any) -> ()} | () -> () | Instance | RBXScriptConnection
+type DestructibleOOP = typeof(setmetatable({}, {} :: { Destroy: (any) -> () }))
+type DisconnectibleOOP = typeof(setmetatable({}, {} :: { Disconnect: (any) -> () }))
+
+export type MaidTask =
+	{ Disconnect: (any) -> () }
+	| { Destroy: (any) -> () }
+	| () -> () | Instance | RBXScriptConnection | DestructibleOOP | DisconnectibleOOP
 export type Maid = {
 	__index: (self: Maid, key: unknown) -> (),
 	__newindex: (self: Maid, index: unknown, newTask: MaidTask) -> (),
 	new: () -> Maid,
-	_tasks: {[unknown]: MaidTask},
+	_tasks: { [unknown]: MaidTask },
 	[unknown]: MaidTask?,
 	_GiveTask: <T>(self: Maid, task: T & MaidTask) -> number,
 	GiveTask: <T>(self: Maid, task: T & MaidTask) -> T,
-	DoCleaning: (self:Maid) -> nil,
+	DoCleaning: (self: Maid) -> nil,
 	Destroy: (self: Maid) -> nil,
 	ClassName: "Maid",
 }
@@ -22,14 +28,12 @@ Maid.ClassName = "Maid"
 
 local MaidTaskUtils = require(script.Parent.MaidTaskUtils)
 
-
-
 --- Returns a new Maid object
 -- @constructor Maid.new()
 -- @treturn Maid
 function Maid.new(): Maid
-	local self:{[any]: any?} = {
-		_tasks = {}
+	local self: { [any]: any? } = {
+		_tasks = {},
 	}
 	local s: any = setmetatable(self, Maid)
 	return s
@@ -88,10 +92,10 @@ function Maid:_GiveTask<T>(task: T & MaidTask): number
 		error("Task cannot be false or nil", 2)
 	end
 
-	local taskId = #self._tasks+1
+	local taskId = #self._tasks + 1
 	self[taskId] = task
 
-	if type(task) == "table" and (not task.Destroy) then
+	if type(task) == "table" and not task.Destroy then
 		warn("[Maid.GiveTask] - Gave table task without .Destroy\n\n" .. debug.traceback())
 	end
 
@@ -134,7 +138,6 @@ function Maid:DoCleaning()
 	end
 	return nil
 end
-
 
 --- Alias for DoCleaning()
 -- @function Destroy
