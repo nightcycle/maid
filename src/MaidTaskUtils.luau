@@ -1,16 +1,31 @@
 ---
 -- @module MaidTaskUtils
 -- @author Quenty
+type DestructibleOOPImpl = {
+	__index: DestructibleOOPImpl,
+	Destroy: (any) -> (),
+}
+type DisconnectibleOOPImpl = {
+	__index: DisconnectibleOOPImpl,
+	Disconnect: (any) -> (),
+}
+type DestructibleOOP = typeof(setmetatable({}, {} :: DestructibleOOPImpl))
+type DisconnectibleOOP = typeof(setmetatable({}, {} :: DisconnectibleOOPImpl))
 
+export type MaidTask =
+	{ Disconnect: (any) -> () }
+	| { Destroy: (any) -> () }
+	| () -> () | Instance | RBXScriptConnection | DestructibleOOP | DisconnectibleOOP
 local MaidTaskUtils = {}
 
-function MaidTaskUtils.isValidTask(job): boolean
+function MaidTaskUtils.isValidTask(job: MaidTask): boolean
 	return type(job) == "function"
 		or typeof(job) == "RBXScriptConnection"
-		or type(job) == "table" and type(job.Destroy) == "function"
+		or type(job) == "table"
+			and (type((job :: any).Destroy) == "function" or type((job :: any).Disconnect) == "function")
 end
 
-function MaidTaskUtils.doTask(job, key: any?): nil
+function MaidTaskUtils.doTask(job: MaidTask, key: any?): nil
 	if type(job) == "function" then
 		job()
 	elseif typeof(job) == "RBXScriptConnection" then
@@ -28,8 +43,10 @@ function MaidTaskUtils.doTask(job, key: any?): nil
 				job:Destroy()
 			end)
 		end
-	elseif type(job) == "table" and type(job.Destroy) == "function" then
-		job:Destroy()
+	elseif type(job) == "table" and type((job :: any).Destroy) == "function" then
+		(job :: any):Destroy()
+	elseif type(job) == "table" and type((job :: any).Disconnect) == "function" then
+		(job :: any):Disconnect()
 	else
 		print("Job info:", typeof(job))
 		print("Key", key)
@@ -43,7 +60,7 @@ function MaidTaskUtils.doTask(job, key: any?): nil
 	return nil
 end
 
-function MaidTaskUtils.delayed(time, job): () -> nil
+function MaidTaskUtils.delayed(time: number, job: MaidTask): () -> nil
 	assert(type(time) == "number", "Bad time")
 	assert(MaidTaskUtils.isValidTask(job), "Bad job")
 

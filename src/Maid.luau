@@ -3,13 +3,8 @@
 -- Useful for encapsulating state and make deconstructors easy
 -- @classmod Maid
 -- @see Signal
-type DestructibleOOP = typeof(setmetatable({}, {} :: { Destroy: (any) -> () }))
-type DisconnectibleOOP = typeof(setmetatable({}, {} :: { Disconnect: (any) -> () }))
-
-export type MaidTask =
-	{ Disconnect: (any) -> () }
-	| { Destroy: (any) -> () }
-	| () -> () | Instance | RBXScriptConnection | DestructibleOOP | DisconnectibleOOP
+local MaidTaskUtils = require("./MaidTaskUtils")
+type MaidTask = MaidTaskUtils.MaidTask
 export type Maid = {
 	__index: (self: Maid, key: unknown) -> (),
 	__newindex: (self: Maid, index: unknown, newTask: MaidTask) -> (),
@@ -26,8 +21,6 @@ export type Maid = {
 
 local Maid: Maid = {} :: any
 Maid.ClassName = "Maid"
-
-local MaidTaskUtils = require("./MaidTaskUtils")
 
 --- Returns a new Maid object
 -- @constructor Maid.new()
