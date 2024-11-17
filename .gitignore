@@ -4,6 +4,8 @@
 Packages/**
 types
 lints
+build
+serve
 
 # Files
 sourcemap.json
@@ -14,7 +16,6 @@ keys.txt
 # File types
 *.lock
 *.gitconfig
-*.rbxl
 *.rbxlx
-*.lock
+*.rbxl
 

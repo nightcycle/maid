@@ -1,6 +1,5 @@
 std = "lints/luau+roblox"
 exclude = [
-	"out/*", 
 	"*.spec.lua",
 	"*.spec.luau",  
 	"*.remodel.lua", 
@@ -8,7 +7,6 @@ exclude = [
 	"*.d.lua",
 	"*.story.lua",
 	"*.story.luau",
-	"gamework/*", 
 	"scripts/*", 
 ]
 [lints]

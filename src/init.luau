@@ -1,12 +1,12 @@
-local Maid = require(script.Maid)
-local MaidTaskUtils = require(script.MaidTaskUtils)
+local Maid = require("./Maid")
+local MaidTaskUtils = require("./MaidTaskUtils")
 
 export type Maid = Maid.Maid
 export type MaidTask = Maid.MaidTask
 export type MaidConstructor = {
 	isValidTask: (job: any) -> boolean,
 	doTask: (job: any, key: any?) -> nil,
-	delayed: (time: number, job: any) -> (()->nil),
+	delayed: (time: number, job: any) -> () -> nil,
 	new: () -> Maid,
 }
 

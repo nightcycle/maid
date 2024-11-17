@@ -1,10 +1,11 @@
 [package]
 name = "nightcycle/package"
 description = "A package!"
-version = "1.0.0"
-authors = ["Quenty", "CJ Oyer <coyer@nightcycle.us>"]
+version = "0.1.0"
+authors = ["CJ Oyer <coyer@nightcycle.us>"]
 realm = "shared"
 registry = "https://github.com/upliftgames/wally-index"
 exclude = ["Packages", ".vscode"]
 
 [dependencies]
+Signal = "nightcycle/signal@1.0.2"

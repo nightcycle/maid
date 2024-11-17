@@ -1,6 +1,6 @@
 {
-  "name": "maid",
-  "tree": {
-    "$path": "src"
-  }
+	"name": "package",
+	"tree": {
+		"$path": "src"
+	}
 }

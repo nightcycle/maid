@@ -13,26 +13,28 @@ export type MaidTask =
 export type Maid = {
 	__index: (self: Maid, key: unknown) -> (),
 	__newindex: (self: Maid, index: unknown, newTask: MaidTask) -> (),
+	_IsAlive: boolean,
 	new: () -> Maid,
 	_tasks: { [unknown]: MaidTask },
 	[unknown]: MaidTask?,
 	_GiveTask: <T>(self: Maid, task: T & MaidTask) -> number,
 	GiveTask: <T>(self: Maid, task: T & MaidTask) -> T,
-	DoCleaning: (self: Maid) -> nil,
-	Destroy: (self: Maid) -> nil,
+	DoCleaning: (self: Maid) -> (),
+	Destroy: (self: Maid) -> (),
 	ClassName: "Maid",
 }
 
 local Maid: Maid = {} :: any
 Maid.ClassName = "Maid"
 
-local MaidTaskUtils = require(script.Parent.MaidTaskUtils)
+local MaidTaskUtils = require("./MaidTaskUtils")
 
 --- Returns a new Maid object
 -- @constructor Maid.new()
 -- @treturn Maid
 function Maid.new(): Maid
 	local self: { [any]: any? } = {
+		_IsAlive = true,
 		_tasks = {},
 	}
 	local s: any = setmetatable(self, Maid)
@@ -73,7 +75,7 @@ function Maid:__newindex(index: unknown, newTask)
 	tasks[index] = newTask
 
 	if oldTask then
-		MaidTaskUtils.doTask(oldTask, index)
+		MaidTaskUtils.doTask(oldTask :: any, index)
 		-- if type(oldTask) == "function" then
 		-- 	oldTask()
 		-- elseif typeof(oldTask) == "RBXScriptConnection" then
@@ -88,6 +90,9 @@ end
 -- @param task An item to clean
 -- @treturn number taskId
 function Maid:_GiveTask<T>(task: T & MaidTask): number
+	if not rawget(self, "_IsAlive") then
+		error("Maid is dead and cannot accept new tasks", 2)
+	end
 	if not task then
 		error("Task cannot be false or nil", 2)
 	end
@@ -108,7 +113,6 @@ function Maid:GiveTask<T>(task: T & MaidTask): T
 end
 
 --- Cleans up all tasks.
--- @alias Destroy
 function Maid:DoCleaning()
 	local tasks = self._tasks
 
@@ -126,7 +130,7 @@ function Maid:DoCleaning()
 		if index ~= nil then
 			tasks[index] = nil
 		end
-		MaidTaskUtils.doTask(job, index)
+		MaidTaskUtils.doTask(job :: any, index)
 		-- if type(job) == "function" then
 		-- 	job()
 		-- elseif typeof(job) == "RBXScriptConnection" then
@@ -139,8 +143,12 @@ function Maid:DoCleaning()
 	return nil
 end
 
---- Alias for DoCleaning()
--- @function Destroy
-Maid.Destroy = Maid.DoCleaning
+function Maid:Destroy()
+	if not rawget(self, "_IsAlive") then
+		error("Maid is already dead", 2)
+	end
+	rawset(self, "_IsAlive", false :: any)
+	self:DoCleaning()
+end
 
 return Maid
