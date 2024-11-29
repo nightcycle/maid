@@ -11,11 +11,16 @@ type DisconnectibleOOPImpl = {
 }
 type DestructibleOOP = typeof(setmetatable({}, {} :: DestructibleOOPImpl))
 type DisconnectibleOOP = typeof(setmetatable({}, {} :: DisconnectibleOOPImpl))
-
 export type MaidTask =
 	{ Disconnect: (any) -> () }
 	| { Destroy: (any) -> () }
-	| () -> () | Instance | RBXScriptConnection | DestructibleOOP | DisconnectibleOOP
+	| () -> ()
+	| Instance
+	| RBXScriptConnection
+	| DestructibleOOP
+	| DisconnectibleOOP
+	| EditableImage
+	| EditableMesh
 local MaidTaskUtils = {}
 
 function MaidTaskUtils.isValidTask(job: MaidTask): boolean
@@ -30,7 +35,7 @@ function MaidTaskUtils.doTask(job: MaidTask, key: any?): nil
 		job()
 	elseif typeof(job) == "RBXScriptConnection" then
 		job:Disconnect()
-	elseif typeof(job) == "Instance" then
+	elseif typeof(job) == "Instance" or typeof(job) == "EditableImage" or typeof(job) == "EditableMesh" then
 		local function isDestroyed(x: any): boolean
 			-- if x.Parent then return false end
 			local _, result = pcall(function()

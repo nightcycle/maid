@@ -8,7 +8,7 @@ type MaidTask = MaidTaskUtils.MaidTask
 export type Maid = {
 	__index: (self: Maid, key: unknown) -> (),
 	__newindex: (self: Maid, index: unknown, newTask: MaidTask) -> (),
-	_IsAlive: boolean,
+	IsAlive: boolean,
 	new: () -> Maid,
 	_tasks: { [unknown]: MaidTask },
 	[unknown]: MaidTask?,
@@ -27,7 +27,7 @@ Maid.ClassName = "Maid"
 -- @treturn Maid
 function Maid.new(): Maid
 	local self: { [any]: any? } = {
-		_IsAlive = true,
+		IsAlive = true,
 		_tasks = {},
 	}
 	local s: any = setmetatable(self, Maid)
@@ -37,6 +37,9 @@ end
 --- Returns Maid[key] if not part of Maid metatable
 -- @return Maid[key] value
 function Maid:__index(index: unknown)
+	if index == "IsAlive" then
+		return rawget(self, "IsAlive")
+	end
 	if Maid[index] then
 		return Maid[index]
 	else
@@ -83,7 +86,7 @@ end
 -- @param task An item to clean
 -- @treturn number taskId
 function Maid:_GiveTask<T>(task: T & MaidTask): number
-	if not rawget(self, "_IsAlive") then
+	if not rawget(self, "IsAlive") then
 		error("Maid is dead and cannot accept new tasks", 2)
 	end
 	if not task then
@@ -137,10 +140,10 @@ function Maid:DoCleaning()
 end
 
 function Maid:Destroy()
-	if not rawget(self, "_IsAlive") then
+	if not rawget(self, "IsAlive") then
 		error("Maid is already dead", 2)
 	end
-	rawset(self, "_IsAlive", false :: any)
+	rawset(self, "IsAlive", false :: any)
 	self:DoCleaning()
 end
 
