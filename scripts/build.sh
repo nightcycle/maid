@@ -46,7 +46,6 @@ if [ "$is_wally" = true ]; then
 fi
 
 cp -r "src" "$build_dir/src"
-cp -rL "Packages" "$build_dir/Packages"
 cp -rL "scripts" "$build_dir/scripts"
 
 cp -r "types" "$build_dir/types"
@@ -67,8 +66,8 @@ stylua "$build_dir/src"
 if [ "$is_serve" = true ]; then
 	echo "running serve darklua"
 	rojo sourcemap --watch "$ROJO_CONFIG" -o "$SOURCEMAP" &
-	darklua process "src" "$build_dir/src" --config "$DARKLUA_CONFIG" -w & 
-	# darklua process "node_modules" "$build_dir/node_modules" --config "$DARKLUA_CONFIG" -w & 
+	darklua process "src" "$build_dir/src" --config "$DARKLUA_CONFIG" -w &
+	# darklua process "node_modules" "$build_dir/node_modules" --config "$DARKLUA_CONFIG" -w &
 else
 	echo "running build darklua"
 	rojo sourcemap "$build_dir/$ROJO_CONFIG" -o "$build_dir/$SOURCEMAP"
