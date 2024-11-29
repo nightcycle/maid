@@ -3,7 +3,7 @@
 	"tree": {
 		"$className": "Folder",
 		"Wally": {
-			"$path": "Packages",
+			"$className": "Folder",
 			"Main": {
 				"$path": "src"
 			}
