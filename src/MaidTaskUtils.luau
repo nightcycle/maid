@@ -25,7 +25,7 @@ local MaidTaskUtils = {}
 
 function MaidTaskUtils.isValidTask(job: MaidTask): boolean
 	return type(job) == "function"
-		or typeof(job) == "RBXScriptConnection"
+		or typeof(job) == "RBXScriptConnection" or typeof(job) == "Instance" or typeof(job) == "Object"
 		or type(job) == "table"
 			and (type((job :: any).Destroy) == "function" or type((job :: any).Disconnect) == "function")
 end
@@ -35,7 +35,7 @@ function MaidTaskUtils.doTask(job: MaidTask, key: any?): nil
 		job()
 	elseif typeof(job) == "RBXScriptConnection" then
 		job:Disconnect()
-	elseif typeof(job) == "Instance" or typeof(job) == "EditableImage" or typeof(job) == "EditableMesh" then
+	elseif typeof(job) == "Instance" or typeof(job) == "Object" then
 		local function isDestroyed(x: any): boolean
 			-- if x.Parent then return false end
 			local _, result = pcall(function()
